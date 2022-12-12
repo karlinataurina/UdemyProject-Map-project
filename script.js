@@ -8,12 +8,9 @@ const inputDuration = document.querySelector('.form__input--duration');
 const inputCadence = document.querySelector('.form__input--cadence');
 const inputElevation = document.querySelector('.form__input--elevation');
 
-// let map, mapEvent; // <-- no need for these anymore.
-
 class Workout {// Parent class for both workout types. This class will take in the data that is common to both workouts.
     date = new Date(); // the date when the workout[object] was created.
     id = (Date.now() + "").slice(-10); // the id of the workout, must be unique, so we can identify it later.
-    // clicks = 0; // number of clicks on the page
 
     constructor(coords, distance, duration) { // coords will be an array of coordinates: [lat, lng]
         this.coords = coords; // this.coords=coords that we get as an input from user.
@@ -27,10 +24,6 @@ class Workout {// Parent class for both workout types. This class will take in t
         this.description = `${this.type[0].toUpperCase()}${this.type.slice(1)} on
         ${months[this.date.getMonth()]} ${this.date.getDate()}`;
     }
-
-    //click() {
-        //this.clicks++; // this counts clicks when you click on workout in list
-    //}
 }
 
 class Running extends Workout {
@@ -38,8 +31,8 @@ class Running extends Workout {
 
     constructor(coords, distance, duration, cadence) {
         super(coords, distance, duration);
-        this.cadence = cadence; /*cadence=soļu skaits minūtē*/
-        this.calcPace(); /*pace=ritms*/
+        this.cadence = cadence;
+        this.calcPace();
         this._setDescription();
     }
 
@@ -73,9 +66,8 @@ class Cycling extends Workout {
 
 ///////////////////////////////////////////////////////////////////
 // APP ARCHITECTURE
-/* Implementing[refactoring] the project architecture
-- Implementing the app class [see "Mapty-architecture-part-1.png"]
-We'll put code here that we already have written at the bottom of this file, after the App class - we do this so it's more organized: */
+/* Implementing the project architecture
+- Implementing the app class [see "Mapty-architecture-part-1.png"] */
 class App {
     #map; // private instance property - is gonna be present on all instances created by this class
     #mapZoomLVL = 13; // private instance property - is gonna be present on all instances created by this class
@@ -317,11 +309,6 @@ class App {
                 duration: 1,
             },
         });
-
-        /* everytime we click on a workout in sidebar,
-        the click count goes up in console, this is just to show that we can interact
-        with each of the objects, using their public interface: */
-        //workout.click();
     }
         _setLocalStorage() { // don't use localStorage to store large amounts of data - it'll slow down your app!
             localStorage.setItem('workouts', JSON.stringify(this.#workouts));
@@ -348,68 +335,3 @@ class App {
     };
 
 const app = new App(); // this object is created in the beggining(in the constructor) when the page loads
-
-// ----------------------------------------------------------------------------------------------------------------
-/* --- THIS CODE BLOCK GOES INTO CLASS CODE(class App) ABOVE[call it refactoring]:
-// DISPLAYING A MAP USING LEAFLET LIBRARY:
-if (navigator.geolocation)
-    navigator.geolocation.getCurrentPosition(
-        function (position) { // <-- this callback function is gonna become the "_laodMap()"
-
-            // let's now get the longitude and latitude from the object:
-            const { latitude } = position.coords;
-            const { longitude } = position.coords;
-            console.log(`https://www.google.com/maps/@${latitude},${longitude}`); // my current location
-
-            const coords = [latitude, longitude]; // we get the longitude and latitude from the objects above.
-
-            // This code comes from leaflet, makes a map:
-            map = L.map('map').setView(coords, 13);
-            // "map" must be an ID of an element in HTML (in our case at the bottom of HTML) .. nr.13 is the zoom level of map.
-
-            L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            }).addTo(map);
-
-            // handling clicks on map:
-            map.on("click", function (mapEv) {// map.on() method comes from leaflet not JS, and map object is also made by leaflet.
-                mapEvent = mapEv;
-                form.classList.remove("hidden"); // shows sidebar content when we click on map
-                inputDistance.focus();// focuses on the "Distance" input field when we click on map
-            });
-        },
-        function () {
-            alert("Could not get your location!");
-        }
-    );
-
-form.addEventListener("submit", function (event) {
-    event.preventDefault();
-
-    // Clear the input fields [setting them to empty string] so they're empty at first:
-    inputDistance.value = inputDuration.value = inputCadence.value = inputElevation.value = "";
-
-    // Displays the pop-up marker:
-    console.log(mapEvent);
-    const { lat, lng } = mapEvent.latlng;
-    // this creates a pop-up thing[upside down raindrop]:
-    L.marker([lat, lng]) // because of lat/lng, the pop-up thing shows up everywhere you click on map
-        .addTo(map) // adds the pop-up thing to the map
-        .bindPopup(
-            L.popup({
-                maxWidth: 200,
-                minWidth: 100,
-                autoClose: false,
-                closeOnClick: false,
-                className: "running-popup",
-            })
-        ) // adds the pop-up window to the marker
-        .setPopupContent('Workout')
-        .openPopup(); // opens the pop-up window
-});
-
-inputType.addEventListener("change", function () {
-    inputElevation.closest(".form__row").classList.toggle("form__row--hidden");
-    inputCadence.closest(".form__row").classList.toggle("form__row--hidden");
-}); // <--  this will change the last input field on map form: if Type=Cycling, the field name="Elev Gain" and input value is in meters; if Type=Running, the field name="Cadence" and input value is in steps/min;
---- THIS GOES INTO CLASS END --- */
